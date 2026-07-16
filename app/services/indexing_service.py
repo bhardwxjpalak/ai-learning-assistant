@@ -1,5 +1,7 @@
 from pathlib import Path
 from app.core.logger import logger
+from app.database.database import SessionLocal
+from app.models.document import Document
 from app.services.pdf_parser import PDFParser
 from app.services.chunker import Chunker
 from app.services.embedding import EmbeddingService
@@ -82,12 +84,34 @@ class IndexingService:
         # Store vectors
         # -----------------------------
         self.vector_store.add_chunks(
-            chunks=chunks,
-            embeddings=embeddings,
-            document_name=document_name,
-        )
+    chunks=chunks,
+    embeddings=embeddings,
+    document_name=document_name,
+)
 
-        logger.info(
-            "Finished indexing '%s'.",
-            document_name,
-        )
+        db = SessionLocal()
+
+        try:
+            document = Document(
+        filename=document_name,
+        total_pages=len(pages),
+        total_chunks=len(chunks),
+        status="INDEXED",
+    )
+
+            db.add(document)
+
+            db.commit()
+
+            logger.info(
+        "Saved metadata for '%s'.",
+        document_name,
+    )
+
+        finally:
+            db.close()
+
+            logger.info(
+    "Finished indexing '%s'.",
+    document_name,
+)

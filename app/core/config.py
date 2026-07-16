@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     CHROMA_COLLECTION: str = "documents"
     CHROMA_DB_PATH: str = "chroma_db"
     UPLOAD_DIRECTORY: str = "uploads"
+    DATABASE_URL: str = "sqlite:///documents.db"
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
