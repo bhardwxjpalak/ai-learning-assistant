@@ -1,0 +1,39 @@
+vevn/
+__pycache__/
+*.pyc
+.env
+
+uploads/
+data/vectorstore/
+
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual Environment
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# Python cache
+.pytest_cache/
+
+# Chroma Database
+chroma_db/
+
+# Uploaded PDFs
+uploads/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
