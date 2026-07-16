@@ -27,6 +27,7 @@ venv/
 
 # Chroma Database
 chroma_db/
+documents.db
 
 # Uploaded PDFs
 uploads/
