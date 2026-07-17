@@ -80,3 +80,24 @@ class VectorStore:
         result = self.collection.get(where={"document": document_name} )
 
         return len(result["ids"]) > 0
+    def delete_document(self, document_name: str) -> None:
+        """
+    Delete all chunks belonging to a document from ChromaDB.
+    """
+        try:
+            self.collection.delete(
+            where={"document": document_name}
+        )
+            logger.info(
+            "Deleted document '%s' from ChromaDB.",
+            document_name,
+        )
+
+        except Exception as e:
+            logger.exception(
+            "Failed to delete document '%s'.",
+            document_name,
+        )
+            raise RuntimeError(
+            f"Failed to delete document from ChromaDB: {e}"
+        )

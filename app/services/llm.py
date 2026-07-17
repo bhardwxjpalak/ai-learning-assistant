@@ -29,10 +29,13 @@ class LLMService:
                 json=payload,
                 timeout=self.timeout,
             )
-
+            if response.status_code !=200:
+                logger.error("ollama response: %s", response.text)
+            
             response.raise_for_status()
             logger.info("Received response from Ollama model '%s'.", self.model,)
-
+            data= response.json()
+            return data["response"]
         except requests.exceptions.RequestException as e:
             logger.exception("Failed to communicate with Ollama.")
             raise RuntimeError(
