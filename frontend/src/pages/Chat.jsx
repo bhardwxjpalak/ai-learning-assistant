@@ -4,6 +4,7 @@ import api from "../api";
 function Chat() {
 
     const [question, setQuestion] = useState("");
+    const [agent, setAgent] = useState("knowledge");
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -20,6 +21,7 @@ function Chat() {
 
             const response = await api.post("/chat/", {
                 question: question,
+                agent:agent,
             });
 
             console.log(response.data);
@@ -28,6 +30,7 @@ function Chat() {
     ...prev,
     {
         question: question,
+        agent:agent,
         answer: response.data.answer,
         sources: response.data.sources,
     },
@@ -58,7 +61,31 @@ setQuestion("");
             <h1 className="text-4xl font-bold mb-8">
                 Chat with your Documents
             </h1>
+            <div className="mb-6">
 
+    <label className="block text-sm font-semibold mb-2">
+        Select AI Agent
+    </label>
+
+    <select
+        value={agent}
+        onChange={(e) => setAgent(e.target.value)}
+        className="w-full border rounded-lg p-3"
+    >
+        <option value="knowledge">
+            Knowledge Assistant
+        </option>
+
+        <option value="summary">
+            Summary Agent
+        </option>
+
+        <option value="research">
+            Research Agent
+        </option>
+    </select>
+
+</div>
             <textarea
                 rows={4}
                 value={question}
@@ -94,6 +121,9 @@ setQuestion("");
             <div className="flex justify-start">
 
                 <div className="bg-gray-100 rounded-xl p-4 max-w-3xl whitespace-pre-wrap">
+                  <p className="text-sm text-gray-500 mb-2">
+            <strong>Agent:</strong> {message.agent}
+        </p>
                     {message.answer}
                 </div>
 

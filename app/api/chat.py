@@ -17,7 +17,9 @@ async def chat(request: ChatRequest):
         status_code=400,
         detail="Question cannot be empty.",
     )
-        result = rag_pipeline.answer(request.question)
+        result = rag_pipeline.answer(
+            question=request.question,
+            agent=request.agent,)
 
         return ChatResponse(
             answer=result["answer"],

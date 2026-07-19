@@ -1,11 +1,13 @@
-from pydantic import BaseModel
-class ChatRequest(BaseModel):
-    question: str
-
-class SourceResponse(BaseModel):
+from pydantic import BaseModel, Field
+from typing import List
+class Source(BaseModel):
     document: str
     page: int
 
+class ChatRequest(BaseModel):
+    question: str = Field(..., min_length=1)
+    agent: str = Field(default="knowledge")
+
 class ChatResponse(BaseModel):
     answer: str
-    sources: list[SourceResponse]
+    sources: List[Source]
