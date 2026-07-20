@@ -4,9 +4,9 @@ from app.api.upload import router as upload_router
 from app.api.chat import router as chat_router
 from app.api.documents import router as documents_router
 app = FastAPI(
-    title="AI Learning Assistant",
+    title="Kortex AI",
     version="1.0.0",
-    description="A RAG-based Learning Assistant using open-source LLMs"
+    description="A RAG-based Assistant using open-source LLMs"
 )
 # ----------------------------
 # CORS Configuration
@@ -34,6 +34,6 @@ app.include_router(documents_router, prefix="/api")
 async def home():
     return {
         "status": "healthy",
-        "project": "AI Learning Assistant",
+        "project": "Kortex AI",
         "version": "1.0.0"
     }

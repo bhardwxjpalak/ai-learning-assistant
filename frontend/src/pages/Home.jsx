@@ -6,25 +6,30 @@ function Home() {
 
     return (
 
-        <div className="flex flex-col items-center justify-center h-full">
+        <div className="flex flex-col items-center justify-center h-full text-center px-8">
 
-            <h1 className="text-5xl font-bold mb-4 text-slate-800">
-                AI Learning Assistant
-            </h1>
+            <div className="mb-8">
 
-            <p className="text-xl text-gray-600 mb-2">
-                Upload PDFs • Ask Questions • Learn Faster
-            </p>
+                <h1 className="text-6xl font-bold text-slate-900 mb-4">
+                    Kortex AI
+                </h1>
 
-            <p className="text-gray-500 mb-10">
-                Turn your study material into an intelligent AI tutor.
-            </p>
+                <p className="text-2xl text-slate-700 mb-3">
+                    Enterprise Knowledge Intelligence Platform
+                </p>
+
+                <p className="text-gray-500 max-w-3xl">
+                    Search, analyze, summarize, and research organizational
+                    knowledge using AI-powered retrieval and intelligent agents.
+                </p>
+
+            </div>
 
             <button
                 onClick={() => navigate("/upload")}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-lg text-lg font-semibold transition"
+                className="bg-slate-900 hover:bg-slate-800 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all"
             >
-                Upload Documents
+                Upload Knowledge Assets
             </button>
 
         </div>
