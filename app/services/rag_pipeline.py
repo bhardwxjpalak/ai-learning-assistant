@@ -30,8 +30,8 @@ class RAGPipeline:
 
         if not question.strip():
             return {
-                "answer": "Please enter a question.",
-                "sources": [],
+                "answer": "Please enter a question."
+                
             }
 
         chunks = self.retriever.retrieve(
@@ -43,8 +43,8 @@ class RAGPipeline:
 
         if not chunks:
             return {
-                "answer": "I couldn't find the answer in the uploaded documents.",
-                "sources": [],
+                "answer": "I couldn't find the answer in the uploaded documents."
+                
             }
 
         selected_agent = self.agent_router.get_agent(agent)
@@ -61,27 +61,7 @@ class RAGPipeline:
 
         logger.info("Generated response successfully.")
 
-        sources = []
-        seen = set()
-
-        for chunk in chunks:
-
-            key = (
-                chunk["document"],
-                chunk["page"],
-            )
-
-            if key not in seen:
-                seen.add(key)
-
-                sources.append(
-                    {
-                        "document": chunk["document"],
-                        "page": chunk["page"],
-                    }
-                )
-
         return {
             "answer": answer,
-            "sources": sources,
+            
         }

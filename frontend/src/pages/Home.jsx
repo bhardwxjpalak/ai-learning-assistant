@@ -20,7 +20,7 @@ function Home() {
 
                 <p className="text-gray-500 max-w-3xl">
                     Search, analyze, summarize, and research organizational
-                    knowledge using AI-powered retrieval and intelligent agents.
+                    knowledge using AI powered retrieval and intelligent agents.
                 </p>
 
             </div>

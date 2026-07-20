@@ -23,7 +23,6 @@ async def chat(request: ChatRequest):
 
         return ChatResponse(
             answer=result["answer"],
-            sources=result["sources"],
         )
 
     except Exception as e:

@@ -1,46 +1,49 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import api from "../api";
+import ChatBox from "../components/ChatBox";
+import Message from "../components/Message";
+import UploadModal from "../components/UploadModal";
+import RepositoryModal from "../components/RepositoryModal";
 
 function Chat() {
-
     const [question, setQuestion] = useState("");
     const [agent, setAgent] = useState("knowledge");
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [uploadOpen, setUploadOpen] = useState(false);
+    const [repositoryOpen, setRepositoryOpen] = useState(false);
+
+    const bottomRef = useRef(null);
+
+    useEffect(() => {
+        bottomRef.current?.scrollIntoView({
+            behavior: "smooth",
+        });
+    }, [messages, loading]);
 
     const askQuestion = async () => {
-
-        if (!question.trim()) {
-            alert("Please enter a question.");
-            return;
-        }
+        if (!question.trim()) return;
 
         setLoading(true);
 
         try {
-
             const response = await api.post("/chat/", {
-                question: question,
-                agent:agent,
+                question,
+                agent,
             });
 
-            console.log(response.data);
-
             setMessages((prev) => [
-    ...prev,
-    {
-        question: question,
-        agent:agent,
-        answer: response.data.answer,
-        sources: response.data.sources,
-    },
-]);
+                ...prev,
+                {
+                    question,
+                    agent,
+                    answer: response.data.answer,
+                },
+            ]);
 
-setQuestion("");
+            setQuestion("");
 
         } catch (error) {
-
-            console.error(error);
 
             alert(
                 error.response?.data?.detail ||
@@ -48,133 +51,95 @@ setQuestion("");
             );
 
         } finally {
-
             setLoading(false);
-
         }
     };
 
     return (
+    <>
+        <div className="h-[calc(100vh-120px)] flex flex-col">
 
-        <div className="max-w-4xl">
+            {/* Conversation */}
 
-            <h1 className="text-4xl font-bold mb-8">
-                Chat with your Documents
-            </h1>
-            <div className="mb-6">
+            <div className="flex-1 overflow-y-auto">
 
-    <label className="block text-sm font-semibold mb-2">
-        Select AI Agent
-    </label>
+                {messages.length === 0 ? (
 
-    <select
-        value={agent}
-        onChange={(e) => setAgent(e.target.value)}
-        className="w-full border rounded-lg p-3"
-    >
-        <option value="knowledge">
-            Knowledge Assistant
-        </option>
+                    <div className="h-full flex flex-col items-center justify-center text-center">
 
-        <option value="summary">
-            Summary Agent
-        </option>
+                        <h1 className="text-5xl font-bold text-slate-900 mb-4">
+                            KnowledgeHub AI
+                        </h1>
 
-        <option value="research">
-            Research Agent
-        </option>
-    </select>
+                        <p className="text-xl text-slate-600 mb-3">
+                            Enterprise Knowledge Intelligence Platform
+                        </p>
 
-</div>
-            <textarea
-                rows={4}
-                value={question}
-                onChange={(e) => setQuestion(e.target.value)}
-                placeholder="Ask a question..."
-                className="w-full border rounded-lg p-4"
-            />
+                        <p className="text-slate-500 max-w-2xl leading-7">
+                            Search, analyze, summarize and research your
+                            organizational knowledge using intelligent AI
+                            agents powered by Retrieval Augmented Generation.
+                        </p>
 
-            <button
-                onClick={askQuestion}
-                disabled={loading}
-                className="mt-4 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
-            >
-                {loading ? "Thinking..." : "Ask"}
-            </button>
-
-              <div className="mt-8 space-y-8">
-
-    {messages.map((message, index) => (
-
-        <div key={index} className="space-y-4">
-
-            {/* User Message */}
-            <div className="flex justify-end">
-
-                <div className="bg-blue-600 text-white rounded-xl p-4 max-w-2xl">
-                    {message.question}
-                </div>
-
-            </div>
-
-            {/* AI Response */}
-            <div className="flex justify-start">
-
-                <div className="bg-gray-100 rounded-xl p-4 max-w-3xl whitespace-pre-wrap">
-                  <p className="text-sm text-gray-500 mb-2">
-            <strong>Agent:</strong> {message.agent}
-        </p>
-                    {message.answer}
-                </div>
-
-            </div>
-
-            {/* Sources */}
-            {message.sources.length > 0 && (
-
-                <div className="ml-2">
-
-                    <h3 className="font-semibold mb-2">
-                        Sources
-                    </h3>
-
-                    <div className="space-y-2">
-
-                        {message.sources.map((source, sourceIndex) => (
-
-                            <div
-                                key={sourceIndex}
-                                className="border rounded-lg p-3 bg-gray-50"
-                            >
-
-                                <p>
-                                    <strong>Document:</strong> {source.document}
-                                </p>
-
-                                <p>
-                                    <strong>Page:</strong> {source.page}
-                                </p>
-
-                            </div>
-
-                        ))}
+                        <div className="mt-12 text-slate-400">
+                            How can I help you today?
+                        </div>
 
                     </div>
 
-                </div>
+                ) : (
 
-            )}
+                    <div className="max-w-6xl mx-auto py-8 px-4 space-y-10">
+
+                        {messages.map((message, index) => (
+                            <Message
+                                key={index}
+                                message={message}
+                            />
+                        ))}
+
+                        <div ref={bottomRef} />
+
+                    </div>
+
+                )}
+
+            </div>
+
+            {/* Fixed Input */}
+
+            <div className="pt-2">
+                <div className="max-w-6xl mx-auto">
+                    <ChatBox
+                        question={question}
+                        setQuestion={setQuestion}
+                        agent={agent}
+                        setAgent={setAgent}
+                        loading={loading}
+                        askQuestion={askQuestion}
+                        onUpload={() => setUploadOpen(true)}
+                        onRepository={() => setRepositoryOpen(true)}
+                    />
+                </div>
+            </div>
 
         </div>
 
-    ))}
+        {/* Upload Modal */}
 
-</div>
-
-</div>
-
-    );
-
+        <UploadModal
+            open={uploadOpen}
+            onClose={() => setUploadOpen(false)}
+            onUploadSuccess={() => {
+                setUploadOpen(false);
+            }}
+        />
+        <RepositoryModal
+    open={repositoryOpen}
+    onClose={() => setRepositoryOpen(false)}
+        />
+    </>
+    
+);
 }
-
 export default Chat;
