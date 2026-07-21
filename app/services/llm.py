@@ -21,6 +21,10 @@ class LLMService:
             "model": self.model,
             "prompt": prompt,
             "stream": False,
+            "options": {\
+        "num_ctx": 2048,
+        "num_predict": 512,
+            }
         }
 
         try:
@@ -42,6 +46,4 @@ class LLMService:
                 f"Failed to communicate with Ollama: {e}"
             )
 
-        data = response.json()
-
-        return data["response"]
+        

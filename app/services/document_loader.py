@@ -10,7 +10,7 @@ class DocumentLoader:
             text = []
             for page in pdf:
                 text.append(page.get_text())
-                return "\n".join(text)
+            return "\n".join(text)
 
         finally:
             pdf.close()

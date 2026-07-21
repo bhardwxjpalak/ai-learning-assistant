@@ -22,8 +22,8 @@ class Settings(BaseSettings):
     TOP_K_INITIAL: int = 15
     TOP_K: int = 5
 
-    SEMANTIC_WEIGHT: float = 0.7
-    KEYWORD_WEIGHT: float = 0.3
+    SEMANTIC_WEIGHT: float = 0.6
+    KEYWORD_WEIGHT: float = 0.4
 
     # Storage
     CHROMA_COLLECTION: str = "documents"

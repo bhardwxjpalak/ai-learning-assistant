@@ -4,6 +4,7 @@ from app.services.retriever import Retriever
 from app.services.agent_router import AgentRouter
 from app.core.config import settings
 from app.core.logger import logger
+import re
 class RAGPipeline:
     """
     End-to-end Retrieval-Augmented Generation pipeline.
@@ -57,11 +58,41 @@ class RAGPipeline:
             chunks=chunks,
         )
 
-        answer = self.llm.generate(prompt)
+        answer = (self.llm.generate(prompt) or "").strip()
+        # Remove "Sources" section
+        answer = re.sub(
+    r"\n*\s*Sources?:.*$",
+    "",
+    answer,
+    flags=re.IGNORECASE | re.DOTALL,
+)
+
+# Remove common reference phrases
+        patterns = [
+    r"According to the document[:,]?\s*",
+    r"According to the knowledge base[:,]?\s*",
+    r"Based on the document[:,]?\s*",
+    r"Based on the uploaded document[:,]?\s*",
+]
+
+        for pattern in patterns:
+            answer = re.sub(
+        pattern,
+        "",
+        answer,
+        flags=re.IGNORECASE,
+    )
+
+        answer = answer.strip()
+        if not answer:
+            logger.warning("LLM returned an empty response.")
+            answer = (
+        "I couldn't generate a response. "
+        "Please try again."
+    )
 
         logger.info("Generated response successfully.")
 
         return {
-            "answer": answer,
-            
-        }
+    "answer": answer,
+}

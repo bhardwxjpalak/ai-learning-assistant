@@ -1,18 +1,20 @@
 import re
+from collections import Counter
 
-from app.services.embedding import EmbeddingService
-from app.services.vector_store import VectorStore
 from app.core.config import settings
 from app.core.logger import logger
+from app.services.embedding import EmbeddingService
+from app.services.vector_store import VectorStore
 
 
 class Retriever:
     """
-    Retrieves the most relevant document chunks
-    for a user query.
+    Retrieves the most relevant chunks using
+    hybrid semantic + lexical reranking.
     """
 
     def __init__(self) -> None:
+
         self.embedding_service = EmbeddingService()
         self.vector_store = VectorStore()
 
@@ -22,33 +24,81 @@ class Retriever:
         text: str,
     ) -> float:
         """
-        Calculate simple keyword overlap score.
+        Computes a lexical relevance score using:
+        - keyword coverage
+        - keyword frequency
+        - exact phrase bonus
+        - length normalization
         """
 
-        query_words = set(
-            re.findall(r"\w+", query.lower())
-        )
+        query_tokens = re.findall(r"\w+", query.lower())
+        text_tokens = re.findall(r"\w+", text.lower())
 
-        text_words = set(
-            re.findall(r"\w+", text.lower())
-        )
-
-        if not query_words:
+        if not query_tokens or not text_tokens:
             return 0.0
 
-        overlap = len(query_words.intersection(text_words))
+        query_counter = Counter(query_tokens)
+        text_counter = Counter(text_tokens)
 
-        return overlap / len(query_words)
+        # -----------------------------------
+        # 1. Coverage
+        # -----------------------------------
+
+        matched = sum(
+            1
+            for word in query_counter
+            if word in text_counter
+        )
+
+        coverage_score = matched / len(query_counter)
+
+        # -----------------------------------
+        # 2. Frequency
+        # -----------------------------------
+
+        frequency_score = sum(
+            min(text_counter[word], query_counter[word])
+            for word in query_counter
+            if word in text_counter
+        )
+
+        frequency_score /= len(query_tokens)
+
+        # -----------------------------------
+        # 3. Phrase bonus
+        # -----------------------------------
+
+        phrase_bonus = (
+            0.10
+            if query.lower() in text.lower()
+            else 0.0
+        )
+
+        # -----------------------------------
+        # 4. Length normalization
+        # -----------------------------------
+
+        length_factor = min(
+            1.0,
+            len(query_tokens) /
+            max(len(text_tokens), 1)
+        )
+
+        lexical_score = (
+            0.45 * coverage_score +
+            0.35 * frequency_score +
+            0.20 * length_factor
+        )
+
+        lexical_score += phrase_bonus
+
+        return min(lexical_score, 1.0)
 
     def retrieve(
         self,
         query: str,
         top_k: int = settings.TOP_K,
     ) -> list[dict]:
-        """
-        Retrieve the most relevant chunks using
-        hybrid semantic + keyword ranking.
-        """
 
         query_embedding = self.embedding_service.embed_query(query)
 
@@ -72,16 +122,28 @@ class Retriever:
             distances,
         ):
 
+            # -----------------------------
+            # Semantic score
+            # -----------------------------
+
             semantic_score = 1 / (1 + distance)
+
+            # -----------------------------
+            # Lexical score
+            # -----------------------------
 
             keyword_score = self._keyword_score(
                 query=query,
                 text=document,
             )
 
+            # -----------------------------
+            # Hybrid score
+            # -----------------------------
+
             combined_score = (
-                settings.SEMANTIC_WEIGHT * semantic_score
-                + settings.KEYWORD_WEIGHT * keyword_score
+                settings.SEMANTIC_WEIGHT * semantic_score +
+                settings.KEYWORD_WEIGHT * keyword_score
             )
 
             retrieved_chunks.append(
@@ -96,8 +158,16 @@ class Retriever:
                 }
             )
 
+        # -----------------------------------------
+        # Stable reranking
+        # -----------------------------------------
+
         retrieved_chunks.sort(
-            key=lambda x: x["combined_score"],
+            key=lambda chunk: (
+                chunk["combined_score"],
+                chunk["keyword_score"],
+                chunk["semantic_score"],
+            ),
             reverse=True,
         )
 
