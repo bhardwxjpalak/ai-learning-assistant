@@ -11,7 +11,7 @@ function Layout({ children }) {
 
         <Header />
 
-        <main className="flex-1 overflow-y-auto bg-slate-100 p-8">
+        <main className="flex-1 overflow-hidden bg-slate-100 p-8">
           {children}
         </main>
 

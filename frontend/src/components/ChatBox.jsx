@@ -1,3 +1,4 @@
+import { useRef, useEffect } from "react";
 import { Plus, Eye, Send, ChevronDown } from "lucide-react";
 
 function ChatBox({
@@ -10,9 +11,41 @@ function ChatBox({
     onUpload,
     onRepository,
 }) {
-    return (
-        <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-4">
+    const textareaRef = useRef(null);
 
+    const handleInput = (e) => {
+        setQuestion(e.target.value);
+
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        // Reset height before calculating new height
+        textarea.style.height = "auto";
+
+        // Grow up to 180px
+        textarea.style.height = `${Math.min(textarea.scrollHeight, 180)}px`;
+    };
+
+    // Reset textarea height after sending a message
+    useEffect(() => {
+        if (question === "" && textareaRef.current) {
+            textareaRef.current.style.height = "auto";
+        }
+    }, [question]);
+
+    return (
+        <div
+            className="
+                bg-white
+                border
+                border-slate-200
+                rounded-3xl
+                shadow-xl
+                backdrop-blur
+                p-4
+                transition-all
+            "
+        >
             {/* Top Toolbar */}
 
             <div className="flex items-center justify-between mb-3">
@@ -72,11 +105,23 @@ function ChatBox({
             <div className="flex items-end gap-3">
 
                 <textarea
-                    rows={2}
+                    ref={textareaRef}
+                    rows={1}
                     value={question}
-                    onChange={(e) => setQuestion(e.target.value)}
+                    onChange={handleInput}
                     placeholder="Ask anything about your knowledge..."
-                    className="flex-1 resize-none border-0 outline-none bg-transparent text-slate-800 placeholder:text-slate-400"
+                    className="
+                        flex-1
+                        resize-none
+                        border-0
+                        outline-none
+                        bg-transparent
+                        text-slate-800
+                        placeholder:text-slate-400
+                        overflow-y-auto
+                        max-h-[180px]
+                        leading-7
+                    "
                     onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                             e.preventDefault();
